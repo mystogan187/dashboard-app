@@ -1,18 +1,11 @@
+version: '3.8'
 
 services:
-###> doctrine/doctrine-bundle ###
-  database:
+  dashboard-mysql:
     ports:
-      - "5432"
-###< doctrine/doctrine-bundle ###
-
-###> symfony/mailer ###
-  mailer:
-    image: axllent/mailpit
-    ports:
-      - "1025"
-      - "8025"
+      - "3307:3306"
     environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
-      MP_SMTP_AUTH_ALLOW_INSECURE: 1
-###< symfony/mailer ###
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: dashboard_app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: 123
