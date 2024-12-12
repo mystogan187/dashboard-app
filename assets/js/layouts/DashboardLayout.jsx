@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Menu, ChevronDown, Search, Bell, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import Sidebar from '../components/Sidebar';
 
 const DashboardLayout = () => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
@@ -56,14 +57,7 @@ const DashboardLayout = () => {
             </nav>
 
             <div className="flex">
-                {/* Sidebar */}
-                <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 bg-white min-h-screen shadow-sm`}>
-                    <div className="p-4">
-                        <h1 className={`font-bold text-xl ${!sidebarOpen && 'hidden'}`}>Dashboard</h1>
-                    </div>
-                </aside>
-
-                {/* Content */}
+                <Sidebar isOpen={sidebarOpen} />
                 <main className="flex-1 p-6">
                     <Outlet />
                 </main>

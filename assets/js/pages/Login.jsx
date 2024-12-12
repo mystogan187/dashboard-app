@@ -5,13 +5,15 @@ import { useAuth } from '../contexts/AuthContext';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login, loading, error } = useAuth();
+    const { login, loginLoading, checkAuth, error } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const success = await login(email, password);
+
         if (success) {
+            await checkAuth();
             navigate('/');
         }
     };
@@ -49,10 +51,10 @@ const Login = () => {
                     </div>
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loginLoading}
                         className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                     >
-                        {loading ? 'Cargando...' : 'Entrar'}
+                        {loginLoading ? 'Cargando...' : 'Entrar'}
                     </button>
                 </form>
             </div>

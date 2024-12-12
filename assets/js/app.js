@@ -1,26 +1,24 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Users from './pages/Users';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import '../styles/app.css';
 
 const PrivateRoute = ({ children }) => {
-    const { isAuthenticated, loading, checkAuth } = useAuth();
-    const navigate = useNavigate();
+    const { isAuthenticated, authLoading } = useAuth();
 
-    useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
-
-    if (loading) {
+    if (authLoading) {
         return <div>Cargando...</div>;
     }
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace={true} />;
     }
 
     return children;
@@ -32,15 +30,15 @@ const App = () => {
             <Router>
                 <Routes>
                     <Route path="/login" element={<Login />} />
-                    <Route
-                        path="/"
-                        element={
-                            <PrivateRoute>
-                                <DashboardLayout />
-                            </PrivateRoute>
-                        }
-                    >
+                    <Route path="/" element={
+                        <PrivateRoute>
+                            <DashboardLayout />
+                        </PrivateRoute>
+                    }>
                         <Route index element={<Dashboard />} />
+                        <Route path="users" element={<Users />} />
+                        <Route path="profile" element={<Profile />} />
+                        <Route path="settings" element={<Settings />} />
                     </Route>
                 </Routes>
             </Router>

@@ -1,22 +1,22 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+    const [authLoading, setAuthLoading] = useState(true);
+    const [loginLoading, setLoginLoading] = useState(false);
+
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // ✅ 1️⃣ Control de login
     const login = async (email, password) => {
-        setLoading(true);
+        setLoginLoading(true);
         setError(null);
         try {
-            // Aquí haremos la llamada a la API de Symfony
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/login_check', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
 
@@ -25,53 +25,73 @@ export const AuthProvider = ({ children }) => {
             }
 
             const data = await response.json();
+
             setUser(data.user);
             localStorage.setItem('token', data.token);
+
             return true;
         } catch (err) {
             setError(err.message);
             return false;
         } finally {
-            setLoading(false);
+            setLoginLoading(false);
         }
     };
 
+    // ✅ 2️⃣ Control de logout
     const logout = () => {
         setUser(null);
         localStorage.removeItem('token');
     };
 
-    const checkAuth = async () => {
+    // ✅ 3️⃣ Control de checkAuth
+    const checkAuth = useCallback(async () => {
         const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                // Aquí verificaremos el token con la API de Symfony
-                const response = await fetch('/api/me', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setUser(data.user);
-                } else {
-                    throw new Error('Sesión inválida');
-                }
-            } catch (err) {
-                logout();
-            }
+        if (!token) {
+            console.log('No hay token, cerrando sesión.');
+            setAuthLoading(false);
+            return;
         }
-    };
+
+        setAuthLoading(true);
+        try {
+            const response = await fetch('/api/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setUser(data.user);
+            } else {
+                throw new Error('Sesión inválida');
+            }
+        } catch (err) {
+            logout();
+        } finally {
+            setAuthLoading(false);
+        }
+    }, []);
+
+    // ✅ 4️⃣ Control de useEffect
+    useEffect(() => {
+        if (!user) {
+            checkAuth();
+        }
+    }, [user, checkAuth]);
+
+    // ✅ 5️⃣ Control de isAuthenticated
+    const isAuthenticated = !!user;
 
     return (
         <AuthContext.Provider value={{
             user,
-            loading,
+            authLoading,
+            loginLoading,
             error,
             login,
             logout,
             checkAuth,
-            isAuthenticated: !!user
+            isAuthenticated
         }}>
             {children}
         </AuthContext.Provider>
