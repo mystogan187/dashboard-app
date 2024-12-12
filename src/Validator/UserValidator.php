@@ -44,7 +44,7 @@ class UserValidator
     {
         $validator = Validation::createValidator();
 
-        $constraints = new Assert\Collection([
+        $baseConstraints = [
             'email' => [
                 new Assert\NotBlank(),
                 new Assert\Email(),
@@ -53,16 +53,21 @@ class UserValidator
                 new Assert\NotBlank(),
                 new Assert\Length(['min' => 3]),
             ],
-            'password' => [
-                new Assert\Optional([
-                    new Assert\Length(['min' => 6]),
-                ]),
-            ],
             'roles' => [
                 new Assert\NotBlank(),
                 new Assert\Type('array'),
             ],
-        ]);
+        ];
+
+        if (!empty($data['password'])) {
+            $baseConstraints['password'] = new Assert\Length(['min' => 6]);
+        }
+
+        $constraints = new Assert\Collection(
+            $baseConstraints,
+            allowExtraFields: true,
+            allowMissingFields: true
+        );
 
         $violations = $validator->validate($data, $constraints);
 
