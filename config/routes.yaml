@@ -6,3 +6,7 @@ controllers:
 
 api_login_check:
     path: /api/login_check
+
+api_controllers:
+    resource: ../src/Dashboard/Settings/Infrastructure/Controller/
+    type: attribute
