@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
 
-    // ✅ 1️⃣ Control de login
     const login = async (email, password) => {
         setLoginLoading(true);
         setError(null);
@@ -38,13 +37,11 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // ✅ 2️⃣ Control de logout
     const logout = () => {
         setUser(null);
         localStorage.removeItem('token');
     };
 
-    // ✅ 3️⃣ Control de checkAuth
     const checkAuth = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -72,14 +69,37 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    // ✅ 4️⃣ Control de useEffect
+    const updateProfile = async (profileData) => {
+        try {
+            const response = await fetch('/api/profile/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(profileData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al actualizar el perfil');
+            }
+
+            const data = await response.json();
+            setUser(data.user);
+            return data;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        }
+    };
+
     useEffect(() => {
         if (!user) {
             checkAuth();
         }
     }, [user, checkAuth]);
 
-    // ✅ 5️⃣ Control de isAuthenticated
     const isAuthenticated = !!user;
 
     return (
@@ -91,6 +111,8 @@ export const AuthProvider = ({ children }) => {
             login,
             logout,
             checkAuth,
+            updateProfile,
+            setUser,
             isAuthenticated
         }}>
             {children}
