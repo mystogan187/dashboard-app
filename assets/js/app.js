@@ -9,6 +9,7 @@ import Users from './pages/Users';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import '../styles/app.css';
+import {UserPreferencesProvider} from "./contexts/UserPreferencesContext";
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, authLoading } = useAuth();
@@ -27,21 +28,23 @@ const PrivateRoute = ({ children }) => {
 const App = () => {
     return (
         <AuthProvider>
-            <Router>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={
-                        <PrivateRoute>
-                            <DashboardLayout />
-                        </PrivateRoute>
-                    }>
-                        <Route index element={<Dashboard />} />
-                        <Route path="users" element={<Users />} />
-                        <Route path="profile" element={<Profile />} />
-                        <Route path="settings" element={<Settings />} />
-                    </Route>
-                </Routes>
-            </Router>
+            <UserPreferencesProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/" element={
+                            <PrivateRoute>
+                                <DashboardLayout />
+                            </PrivateRoute>
+                        }>
+                            <Route index element={<Dashboard />} />
+                            <Route path="users" element={<Users />} />
+                            <Route path="profile" element={<Profile />} />
+                            <Route path="settings" element={<Settings />} />
+                        </Route>
+                    </Routes>
+                </Router>
+            </UserPreferencesProvider>
         </AuthProvider>
     );
 };
