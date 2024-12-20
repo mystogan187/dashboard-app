@@ -162,6 +162,7 @@ export const UserPreferencesProvider = ({ children }) => {
                 showAlert,
                 alertMessage,
                 isPasswordModalOpen,
+                setIsPasswordModalOpen,
                 loading,
                 error,
                 handleNotificationsChange,

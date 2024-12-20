@@ -1,10 +1,28 @@
-import { LayoutDashboard, Users, Settings, UserCircle } from 'lucide-react';
+import {LayoutDashboard, Users, Settings, UserCircle, Code, MessageSquare, PenTool} from 'lucide-react';
 
 export const navigation = [
     {
         name: 'Dashboard',
         icon: LayoutDashboard,
         path: '/',
+        admin: false
+    },
+    {
+        name: 'Playground',
+        icon: Code,
+        path: '/playground',
+        admin: false
+    },
+    {
+        name: 'AI-gent',
+        icon: MessageSquare,
+        path: '/chatbot',
+        admin: false
+    },
+    {
+        name: 'Canvas',
+        icon: PenTool,
+        path: '/canvas',
         admin: false
     },
     {

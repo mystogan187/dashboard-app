@@ -16,7 +16,6 @@ const DashboardLayout = () => {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            {/* Navbar */}
             <nav className="bg-white shadow-sm">
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -43,7 +42,15 @@ const DashboardLayout = () => {
                             <Settings size={20} />
                         </button>
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-blue-500" />
+                            {user?.profilePhoto ? (
+                                <img
+                                    src={`/uploads/profile/${user.profilePhoto}`}
+                                    alt="Foto de perfil"
+                                    className="w-8 h-8 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-8 h-8 rounded-full bg-blue-500" />
+                            )}
                             <span className="font-medium">{user?.name || 'Usuario'}</span>
                             <button
                                 onClick={handleLogout}

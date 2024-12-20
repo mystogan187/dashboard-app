@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 
@@ -10,6 +11,8 @@ const Profile = () => {
         name: user?.name || '',
         email: user?.email || '',
     });
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef(null);
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -61,6 +64,52 @@ const Profile = () => {
         }
     };
 
+
+    const handlePhotoUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validaciones en el cliente
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            setError('Formato de imagen no válido. Use JPG, PNG o WebP');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('La imagen no debe superar los 5MB');
+            return;
+        }
+
+        setIsUploading(true);
+        setError('');
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        try {
+            const response = await fetch('/api/profile/upload-photo', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al subir la imagen');
+            }
+
+            const data = await response.json();
+            updateProfile(data.user);
+
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     return (
         <div>
             <h2 className="text-2xl font-bold mb-6">Perfil de Usuario</h2>
@@ -72,8 +121,39 @@ const Profile = () => {
                 )}
 
                 <div className="flex items-center mb-6">
-                    <div className="w-24 h-24 rounded-full bg-blue-500 mr-6"></div>
-                    <div>
+                    <div className="relative">
+                        {user?.profilePhoto ? (
+                            <img
+                                src={`/uploads/profile/${user.profilePhoto}`}
+                                alt="Foto de perfil"
+                                className="w-24 h-24 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-24 h-24 rounded-full bg-blue-500"/>
+                        )}
+
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50"
+                            disabled={isUploading}
+                        >
+                            {isUploading ? (
+                                <span
+                                    className="block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>
+                            ) : (
+                                <Camera className="w-5 h-5 text-gray-600"/>
+                            )}
+                        </button>
+
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={handlePhotoUpload}
+                        />
+                    </div>
+                    <div className="ml-6">
                         <h3 className="text-xl font-semibold">{user?.name}</h3>
                         <p className="text-gray-600">{user?.email}</p>
                     </div>
@@ -121,7 +201,7 @@ const Profile = () => {
                                     type="button"
                                     onClick={() => {
                                         setIsEditing(false);
-                                        setFormData({ name: user?.name || '', email: user?.email || '' });
+                                        setFormData({name: user?.name || '', email: user?.email || ''});
                                     }}
                                     className="border px-4 py-2 rounded-lg hover:bg-gray-50"
                                 >

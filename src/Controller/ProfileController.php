@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -87,5 +88,73 @@ class ProfileController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['message' => 'Contraseña actualizada correctamente']);
+    }
+
+
+    #[Route('/upload-photo', name: 'api_profile_upload_photo', methods: ['POST'])]
+    public function uploadPhoto(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        /** @var UploadedFile|null $photo */
+        $photo = $request->files->get('photo');
+
+        if (!$photo) {
+            return $this->json(['message' => 'No se ha proporcionado ninguna imagen'], 400);
+        }
+
+        // Validar el tipo de archivo
+        $mimeType = $photo->getMimeType();
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return $this->json([
+                'message' => 'Formato de imagen no válido. Use JPG, PNG o WebP'
+            ], 400);
+        }
+
+        // Validar tamaño (max 5MB)
+        if ($photo->getSize() > 5 * 1024 * 1024) {
+            return $this->json([
+                'message' => 'La imagen no debe superar los 5MB'
+            ], 400);
+        }
+
+        try {
+            // Generar nombre único
+            $fileName = sprintf(
+                '%s-%s.%s',
+                $user->getId(),
+                uniqid(),
+                $photo->guessExtension()
+            );
+
+            // Mover a directorio de uploads
+            $photo->move(
+                $this->getParameter('profile_photos_directory'),
+                $fileName
+            );
+
+            // Actualizar usuario con nueva foto
+            $user->setProfilePhoto($fileName);
+            $this->entityManager->flush();
+
+            return $this->json([
+                'message' => 'Foto actualizada correctamente',
+                'user' => [
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'name' => $user->getName(),
+                    'profilePhoto' => $fileName,
+                    'roles' => $user->getRoles(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => 'Error al subir la imagen'
+            ], 500);
+        }
     }
 }

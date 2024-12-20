@@ -19,18 +19,22 @@ class UserController extends AbstractController
         private UserPasswordHasherInterface $passwordHasher
     ) {}
 
+    private function serializeUser(User $user): array
+    {
+        return [
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'name' => $user->getName(),
+            'roles' => $user->getRoles(),
+            'profilePhoto' => $user->getProfilePhoto()
+        ];
+    }
+
     #[Route('', methods: ['GET'])]
     public function index(): JsonResponse
     {
         $users = $this->entityManager->getRepository(User::class)->findAll();
-        return $this->json(array_map(function($user) {
-            return [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'name' => $user->getName(),
-                'roles' => $user->getRoles()
-            ];
-        }, $users));
+        return $this->json(array_map([$this, 'serializeUser'], $users));
     }
 
     #[Route('', methods: ['POST'])]
@@ -54,12 +58,7 @@ class UserController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return $this->json([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'name' => $user->getName(),
-            'roles' => $user->getRoles()
-        ], 201);
+        return $this->json($this->serializeUser($user), 201);
     }
 
     #[Route('/{id}', methods: ['PUT'])]
@@ -88,12 +87,7 @@ class UserController extends AbstractController
 
         $this->entityManager->flush();
 
-        return $this->json([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'name' => $user->getName(),
-            'roles' => $user->getRoles()
-        ]);
+        return $this->json($this->serializeUser($user), 201);
     }
 
     #[Route('/{id}', methods: ['DELETE'])]
@@ -122,11 +116,6 @@ class UserController extends AbstractController
             return $this->json(['message' => 'Usuario no encontrado'], 404);
         }
 
-        return $this->json([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'name' => $user->getName(),
-            'roles' => $user->getRoles()
-        ]);
+        return $this->json($this->serializeUser($user), 201);
     }
 }
