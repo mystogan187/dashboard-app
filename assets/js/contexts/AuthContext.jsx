@@ -42,6 +42,42 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
     };
 
+    useEffect(() => {
+        const originalFetch = window.fetch;
+
+        window.fetch = async (...args) => {
+            const [url, options = {}] = args;
+
+            const token = localStorage.getItem('token');
+            if (token) {
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+
+            try {
+                const response = await originalFetch(url, options);
+
+                if (response.status === 401) {
+                    logout();
+                    return Promise.reject('Sesión expirada');
+                }
+
+                return response;
+            } catch (error) {
+                if (error.message?.includes('Failed to fetch')) {
+                    logout();
+                }
+                return Promise.reject(error);
+            }
+        };
+
+        return () => {
+            window.fetch = originalFetch;
+        };
+    }, [logout]);
+
     const checkAuth = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (!token) {

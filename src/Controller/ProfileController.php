@@ -104,7 +104,6 @@ class ProfileController extends AbstractController
             return $this->json(['message' => 'No se ha proporcionado ninguna imagen'], 400);
         }
 
-        // Validar el tipo de archivo
         $mimeType = $photo->getMimeType();
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -122,7 +121,6 @@ class ProfileController extends AbstractController
         }
 
         try {
-            // Generar nombre único
             $fileName = sprintf(
                 '%s-%s.%s',
                 $user->getId(),
@@ -130,13 +128,11 @@ class ProfileController extends AbstractController
                 $photo->guessExtension()
             );
 
-            // Mover a directorio de uploads
             $photo->move(
                 $this->getParameter('profile_photos_directory'),
                 $fileName
             );
 
-            // Actualizar usuario con nueva foto
             $user->setProfilePhoto($fileName);
             $this->entityManager->flush();
 

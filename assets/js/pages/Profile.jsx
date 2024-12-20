@@ -69,7 +69,6 @@ const Profile = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validaciones en el cliente
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
             setError('Formato de imagen no válido. Use JPG, PNG o WebP');
             return;
@@ -101,7 +100,7 @@ const Profile = () => {
             }
 
             const data = await response.json();
-            updateProfile(data.user);
+            setUser(data.user);
 
         } catch (err) {
             setError(err.message);
