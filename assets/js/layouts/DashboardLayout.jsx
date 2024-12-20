@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { Menu, ChevronDown, Search, Bell, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Sidebar from '../components/Sidebar';
+import SettingsMenu from '../components/SettingsMenu';
 
 const DashboardLayout = () => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
@@ -38,9 +39,7 @@ const DashboardLayout = () => {
                         <button className="p-2 rounded-lg hover:bg-gray-100">
                             <Bell size={20} />
                         </button>
-                        <button className="p-2 rounded-lg hover:bg-gray-100">
-                            <Settings size={20} />
-                        </button>
+                        <SettingsMenu />
                         <div className="flex items-center gap-2">
                             {user?.profilePhoto ? (
                                 <img
