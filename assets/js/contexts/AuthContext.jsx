@@ -19,18 +19,19 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ email, password }),
             });
 
-            if (!response.ok) {
-                throw new Error('Credenciales inválidas');
-            }
-
             const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.message);
+                return false;
+            }
 
             setUser(data.user);
             localStorage.setItem('token', data.token);
 
             return true;
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Error al intentar iniciar sesión');
             return false;
         } finally {
             setLoginLoading(false);

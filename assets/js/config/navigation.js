@@ -8,7 +8,7 @@ export const navigation = [
         admin: false
     },
     {
-        name: 'Playground',
+        name: 'Code Interpreter',
         icon: Code,
         path: '/playground',
         admin: false

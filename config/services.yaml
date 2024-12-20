@@ -13,6 +13,8 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    app.jwt_authentication_failure_handler:
+        class: App\Security\JWTAuthenticationFailureHandler
 
     # Command and Query Handlers
     App\Dashboard\Settings\Application\Find\FindUserPreferencesQueryHandler:
