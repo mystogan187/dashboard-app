@@ -16,8 +16,9 @@ const DashboardLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white shadow-sm">
+        <div className="fixed inset-0 flex flex-col bg-gray-100">
+            {/* Header fijo */}
+            <nav className="flex-none bg-white shadow-sm z-10">
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-3">
                         <button
@@ -62,10 +63,18 @@ const DashboardLayout = () => {
                 </div>
             </nav>
 
-            <div className="flex">
-                <Sidebar isOpen={sidebarOpen} />
-                <main className="flex-1 p-6">
-                    <Outlet />
+            {/* Contenedor principal con flex */}
+            <div className="flex-1 flex min-h-0">
+                {/* Sidebar fijo */}
+                <aside className="flex-none bg-white">
+                    <Sidebar isOpen={sidebarOpen} />
+                </aside>
+
+                {/* Área de contenido principal */}
+                <main className="flex-1 overflow-hidden">
+                    <div className="h-full p-6 overflow-y-auto">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>

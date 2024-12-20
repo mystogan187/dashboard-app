@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
 const CodeEditor = ({ code, onChange, language }) => {
     return (
@@ -21,7 +21,7 @@ const OutputPanel = ({ output }) => {
 
 const PlaygroundHeader = ({ language, setLanguage, onRun, onSave }) => {
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
                 <select
                     value={language}
@@ -62,24 +62,6 @@ const Playground = () => {
     const [language, setLanguage] = useState('javascript');
     const [code, setCode] = useState('');
     const [output, setOutput] = useState('');
-    const [height, setHeight] = useState('700px');
-    const containerRef = useRef(null);
-
-    useEffect(() => {
-        const updateHeight = () => {
-            if (containerRef.current) {
-                const viewHeight = window.innerHeight;
-                const containerTop = containerRef.current.getBoundingClientRect().top;
-                const newHeight = Math.floor((viewHeight - containerTop) * 0.9); // 90% del espacio disponible
-                setHeight(`${newHeight}px`);
-            }
-        };
-
-        updateHeight();
-        window.addEventListener('resize', updateHeight);
-
-        return () => window.removeEventListener('resize', updateHeight);
-    }, []);
 
     const handleRunCode = async () => {
         try {
@@ -108,7 +90,7 @@ const Playground = () => {
 
     const handleSaveCode = async () => {
         try {
-            const result = await fetch('/api/playground/save', {
+            await fetch('/api/playground/save', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -125,26 +107,24 @@ const Playground = () => {
     };
 
     return (
-        <div ref={containerRef} className="flex flex-col gap-4">
-            <PlaygroundHeader
-                language={language}
-                setLanguage={setLanguage}
-                onRun={handleRunCode}
-                onSave={handleSaveCode}
-            />
-
-            <div
-                className="grid grid-cols-2 gap-4"
-                style={{ height: height }}
-            >
-                <div className="overflow-hidden">
+        <div className="h-full flex flex-col pb-6">
+            <div className="flex-none">
+                <PlaygroundHeader
+                    language={language}
+                    setLanguage={setLanguage}
+                    onRun={handleRunCode}
+                    onSave={handleSaveCode}
+                />
+            </div>
+            <div className="flex-1 min-h-0 grid grid-cols-2 gap-4">
+                <div className="h-full">
                     <CodeEditor
                         code={code}
                         onChange={setCode}
                         language={language}
                     />
                 </div>
-                <div className="overflow-hidden">
+                <div className="h-full">
                     <OutputPanel output={output} />
                 </div>
             </div>

@@ -6,6 +6,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Playground from './pages/Playground';
+import AiGent from "./pages/AiGent";
 import Users from './pages/Users';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -40,6 +41,7 @@ const App = () => {
                         }>
                             <Route index element={<Dashboard />} />
                             <Route path="playground" element={<Playground />} />
+                            <Route path="chatbot" element={<AiGent />} />
                             <Route path="users" element={<Users />} />
                             <Route path="profile" element={<Profile />} />
                             <Route path="settings" element={<Settings />} />
