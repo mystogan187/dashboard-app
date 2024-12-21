@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import '../styles/app.css';
 import {UserPreferencesProvider} from "./contexts/UserPreferencesContext";
+import Canvas from "./pages/Canvas";
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, authLoading } = useAuth();
@@ -42,6 +43,7 @@ const App = () => {
                             <Route index element={<Dashboard />} />
                             <Route path="playground" element={<Playground />} />
                             <Route path="chatbot" element={<AiGent />} />
+                            <Route path="canvas" element={<Canvas />} />
                             <Route path="users" element={<Users />} />
                             <Route path="profile" element={<Profile />} />
                             <Route path="settings" element={<Settings />} />
