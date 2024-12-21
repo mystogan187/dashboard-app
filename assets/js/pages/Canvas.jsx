@@ -8,7 +8,8 @@ import {
     Image as ImageIcon,
     MousePointer2,
     Minus,
-    Plus
+    Plus,
+    PenTool
 } from 'lucide-react';
 
 const ToolButton = ({ children, active, onClick }) => (
@@ -40,7 +41,10 @@ const Canvas = () => {
         <div className="h-full flex flex-col pb-6">
             <div className="flex-none">
                 <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl font-bold text-gray-800">Canvas</h1>
+                    <div className="flex items-center gap-2">
+                        <PenTool className="w-6 h-6 text-blue-500" />
+                        <h1 className="text-2xl font-bold text-gray-800">Canvas</h1>
+                    </div>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                             <button className="p-1 hover:bg-gray-100 rounded">

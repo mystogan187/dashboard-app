@@ -11,7 +11,7 @@ const Sidebar = ({ isOpen }) => {
     return (
         <aside className={`${isOpen ? 'w-64' : 'w-20'} transition-all duration-300 bg-white min-h-screen shadow-sm`}>
             <div className="p-4">
-                <h1 className={`font-bold text-xl ${!isOpen && 'hidden'}`}>Dashboard</h1>
+                <h1 className={`font-bold text-xl ${!isOpen && 'hidden'}`}>SphereForge</h1>
             </div>
 
             <nav className="mt-5 px-2">
