@@ -6,15 +6,15 @@ namespace App\Dashboard\Settings\Infrastructure\Controller;
 
 use App\Dashboard\Settings\Application\Find\FindUserPreferencesQuery;
 use App\Dashboard\Settings\Application\UpdatePreferences\UpdateUserPreferencesCommand;
-use App\Shared\Domain\Bus\Command\CommandBus;
-use App\Shared\Domain\Bus\Query\QueryBus;
+use App\Dashboard\Shared\Domain\Bus\Command\CommandBus;
+use App\Dashboard\Shared\Domain\Bus\Query\QueryBus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/settings')]
+#[Route('/settings')]
 final class SettingsController extends AbstractController
 {
     public function __construct(
@@ -33,7 +33,7 @@ final class SettingsController extends AbstractController
 
         try {
             $preferences = $this->queryBus->handle(
-                new FindUserPreferencesQuery($user->getId())
+                new FindUserPreferencesQuery($user->id()->value())
             );
 
             return new JsonResponse([
@@ -68,7 +68,7 @@ final class SettingsController extends AbstractController
 
             $this->commandBus->dispatch(
                 new UpdateUserPreferencesCommand(
-                    $user->getId(),
+                    $user->id()->value(),
                     $preferences
                 )
             );

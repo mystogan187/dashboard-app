@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Settings\Application\UpdatePreferences;
 
-use App\Dashboard\Settings\Domain\Settings;
-use App\Dashboard\Settings\Domain\SettingsRepository;
+use App\Dashboard\Settings\Domain\Entity\Settings;
+use App\Dashboard\Settings\Domain\Infrastructure\SettingsRepository;
 use App\Dashboard\Settings\Domain\ValueObjects\UserId;
 use App\Dashboard\Settings\Domain\ValueObjects\UserPreferences;
-use App\Shared\Domain\Bus\Command\CommandHandler;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use App\Dashboard\Shared\Domain\Bus\Command\CommandHandler;
 
-#[AsMessageHandler(bus: 'command_bus')]
 final class UpdateUserPreferencesCommandHandler implements CommandHandler
 {
     public function __construct(

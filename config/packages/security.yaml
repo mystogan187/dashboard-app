@@ -5,7 +5,7 @@ security:
     providers:
         app_user_provider:
             entity:
-                class: App\Entity\User
+                class: App\Dashboard\User\Domain\Entity\User
                 property: email
 
     firewalls:
@@ -13,27 +13,31 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        login:
+            pattern: ^/api/login_check
+            stateless: true
+            security: false
+            provider: app_user_provider
+            methods: ['POST']
+
         api:
             pattern: ^/api
             stateless: true
             provider: app_user_provider
-            json_login:
-                check_path: /api/login_check
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: app.jwt_authentication_failure_handler
-            jwt: ~
+            jwt:
+                provider: app_user_provider
+                authenticator: lexik_jwt_authentication.security.jwt_authenticator
 
         main:
             lazy: true
             provider: app_user_provider
 
     access_control:
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
+        - { path: ^/api/me, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/profile, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/users, roles: ROLE_ADMIN }
-        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
 
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER

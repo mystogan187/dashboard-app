@@ -8,7 +8,6 @@ const Sidebar = ({ isOpen }) => {
     const { user } = useAuth();
     const isAdmin = user?.roles?.includes('ROLE_ADMIN');
 
-    // Separar la navegación en principal y footer
     const mainNavigation = navigation.filter(item => !['Perfil', 'Configuración'].includes(item.name));
     const footerNavigation = navigation.filter(item => ['Perfil', 'Configuración'].includes(item.name));
 

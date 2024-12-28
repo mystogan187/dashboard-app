@@ -1,22 +1,110 @@
+# config/services.yaml
+
 parameters:
     profile_photos_directory: '%kernel.project_dir%/public/uploads/profile'
 
 services:
+
     _defaults:
         autowire: true
         autoconfigure: true
-        public: false
+        bind:
+            $someDefaultParameter: 'defaultValue'
 
     App\:
-        resource: '../src/'
-        exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
-            - '../src/Kernel.php'
-    app.jwt_authentication_failure_handler:
-        class: App\Security\JWTAuthenticationFailureHandler
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
-    # Command and Query Handlers
+    dashboard.controllers:
+        namespace: App\Dashboard\
+        resource: '../src/Dashboard/*/Infrastructure/Controller/'
+        tags: ['controller.service_arguments']
+        public: true
+
+    app.jwt_authentication_failure_handler:
+        class: App\Dashboard\Security\Infrastructure\JWTAuthenticationFailureHandler
+
+    # Servicios Compartidos
+    App\Dashboard\Shared\Infrastructure\Bus\Command\MessengerCommandBus:
+        arguments:
+            $bus: '@command_bus'
+        public: true
+
+    App\Dashboard\Shared\Infrastructure\Bus\Query\MessengerQueryBus:
+        arguments:
+            $bus: '@query_bus'
+        public: false
+
+    # Repositorios
+    App\Dashboard\User\Domain\Infrastructure\UserRepository:
+        alias: App\Dashboard\User\Infrastructure\Persistence\DoctrineUserRepository
+
+    App\Dashboard\User\Infrastructure\Persistence\DoctrineUserRepository:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+
+    App\Dashboard\Settings\Domain\Infrastructure\SettingsRepository:
+        alias: App\Dashboard\Settings\Infrastructure\Persistence\DoctrineSettingsRepository
+
+    App\Dashboard\Settings\Infrastructure\Persistence\DoctrineSettingsRepository:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
+    # Handlers de Mensajes (Comandos y Consultas)
+    App\Dashboard\Profile\Application\UpdateProfile\UpdateProfileHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    App\Dashboard\Profile\Application\ChangePassword\ChangePasswordHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+            $passwordHasher: '@security.password_hasher'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    App\Dashboard\Profile\Application\UploadPhoto\UploadPhotoHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+            $photoUploader: '@App\Dashboard\Profile\Infrastructure\Services\LocalPhotoUploader'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    # User Handlers
+    App\Dashboard\User\Application\Create\CreateUserHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+            $passwordHasher: '@security.password_hasher'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    App\Dashboard\User\Application\Update\UpdateUserHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+            $passwordHasher: '@security.password_hasher'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    App\Dashboard\User\Application\Delete\DeleteUserHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    App\Dashboard\User\Application\Get\GetUserHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'query_bus' }
+
+    App\Dashboard\User\Application\GetAll\GetAllUsersHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'query_bus' }
+
+    # Settings Handlers
     App\Dashboard\Settings\Application\Find\FindUserPreferencesQueryHandler:
         tags:
             - { name: 'messenger.message_handler', bus: 'query_bus' }
@@ -25,7 +113,41 @@ services:
         tags:
             - { name: 'messenger.message_handler', bus: 'command_bus' }
 
-    # Repository
-    App\Dashboard\Settings\Infrastructure\Persistence\DoctrineSettingsRepository:
+    # Profile Services
+    App\Dashboard\Profile\Infrastructure\Services\LocalPhotoUploader:
         arguments:
-            $connection: '@doctrine.dbal.default_connection'
+            $uploadDirectory: '%profile_photos_directory%'
+
+    App\Dashboard\Profile\Domain\Services\PhotoUploader:
+        alias: App\Dashboard\Profile\Infrastructure\Services\LocalPhotoUploader
+
+    App\Dashboard\Security\Infrastructure\Controller\:
+        resource: '../src/Dashboard/Security/Infrastructure/Controller/'
+        tags: ['controller.service_arguments']
+        public: true
+
+    App\Dashboard\Security\Application\Authenticate\AuthenticateHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+            $passwordHasher: '@security.password_hasher'
+            $jwtManager: '@lexik_jwt_authentication.jwt_manager'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }
+
+    App\Dashboard\Security\Application\GetCurrentUser\GetCurrentUserHandler:
+        arguments:
+            $repository: '@App\Dashboard\User\Domain\Infrastructure\UserRepository'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'query_bus' }
+
+    # Configuración de buses
+    App\Dashboard\Shared\Domain\Bus\Command\CommandBus:
+        alias: App\Dashboard\Shared\Infrastructure\Bus\Command\MessengerCommandBus
+        public: true
+
+    App\Dashboard\Shared\Domain\Bus\Query\QueryBus:
+        alias: App\Dashboard\Shared\Infrastructure\Bus\Query\MessengerQueryBus
+
+    App\Dashboard\Security\Infrastructure\EventListener\JWTEventSubscriber:
+        tags:
+            - { name: kernel.event_subscriber }

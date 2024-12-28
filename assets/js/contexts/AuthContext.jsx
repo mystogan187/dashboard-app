@@ -25,7 +25,8 @@ export const AuthProvider = ({ children }) => {
                 setError(data.message);
                 return false;
             }
-
+            console.log("AUTHENTICATION RESPONSE");
+            console.log(data);
             setUser(data.user);
             localStorage.setItem('token', data.token);
 
@@ -52,10 +53,13 @@ export const AuthProvider = ({ children }) => {
             const token = localStorage.getItem('token');
             if (token) {
                 options.headers = {
-                    ...options.headers,
-                    'Authorization': `Bearer ${token}`
+                    ...options.headers || {},
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 };
             }
+
+            console.log('Request:', url, options);
 
             try {
                 const response = await originalFetch(url, options);
@@ -90,7 +94,10 @@ export const AuthProvider = ({ children }) => {
         setAuthLoading(true);
         try {
             const response = await fetch('/api/me', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (response.ok) {

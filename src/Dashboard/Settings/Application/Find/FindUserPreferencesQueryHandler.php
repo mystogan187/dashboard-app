@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Settings\Application\Find;
 
-use App\Dashboard\Settings\Domain\SettingsRepository;
+use App\Dashboard\Settings\Domain\Infrastructure\SettingsRepository;
 use App\Dashboard\Settings\Domain\ValueObjects\UserId;
-use App\Shared\Domain\Bus\Query\QueryHandler;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use App\Dashboard\Shared\Domain\Bus\Query\QueryHandler;
 
-#[AsMessageHandler(bus: 'command_bus')]
 final class FindUserPreferencesQueryHandler implements QueryHandler
 {
     public function __construct(

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Settings\Infrastructure\Persistence;
 
-use App\Dashboard\Settings\Domain\Settings;
-use App\Dashboard\Settings\Domain\SettingsRepository;
+use App\Dashboard\Settings\Domain\Entity\Settings;
+use App\Dashboard\Settings\Domain\Infrastructure\SettingsRepository;
 use App\Dashboard\Settings\Domain\ValueObjects\UserId;
 use App\Dashboard\Settings\Domain\ValueObjects\UserPreferences;
 use Doctrine\DBAL\Connection;

@@ -1,19 +1,7 @@
+# config/packages/messenger.yaml
 framework:
     messenger:
         default_bus: command_bus
-
         buses:
-            command_bus:
-                middleware:
-                    - doctrine_transaction
+            command_bus: ~
             query_bus: ~
-
-        transports:
-            sync: 'sync://'
-
-        routing:
-            'App\Dashboard\Settings\Application\Find\FindUserPreferencesQuery':
-                senders: ['sync']
-
-            'App\Dashboard\Settings\Application\UpdatePreferences\UpdateUserPreferencesCommand':
-                senders: ['sync']

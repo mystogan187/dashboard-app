@@ -4,9 +4,15 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-api_login_check:
-    path: /api/login_check
-
-api_controllers:
-    resource: ../src/Dashboard/Settings/Infrastructure/Controller/
+dashboard_controllers:
+    resource: '../src/Dashboard/'
     type: attribute
+    prefix: '/api'
+    exclude: '../src/Dashboard/{DependencyInjection,Domain,Application}'
+
+app_home:
+    path: /{reactRouting}
+    controller: App\Controller\DashboardController::index
+    requirements:
+        reactRouting: ^(?!api).*$
+    methods: [GET]
