@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 
 final class AuthController extends AbstractController
 {
@@ -19,9 +21,9 @@ final class AuthController extends AbstractController
     #[Route('/login_check', name: 'api_login_check', methods: ['POST'])]
     public function login(Request $request): JsonResponse
     {
-        $content = json_decode($request->getContent(), true);
-
         try {
+            $content = json_decode($request->getContent(), true);
+
             $response = $this->commandBus->dispatch(
                 new AuthenticateCommand(
                     $content['email'] ?? '',
@@ -37,9 +39,10 @@ final class AuthController extends AbstractController
                     'roles' => $response->roles
                 ]
             ], Response::HTTP_OK);
-        } catch (\Exception $e) {
+
+        } catch (HandlerFailedException $e) {
             return new JsonResponse([
-                'error' => $e->getMessage()
+                'error' => 'Invalid credentials'
             ], Response::HTTP_UNAUTHORIZED);
         }
     }

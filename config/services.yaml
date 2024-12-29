@@ -151,3 +151,18 @@ services:
     App\Dashboard\Security\Infrastructure\EventListener\JWTEventSubscriber:
         tags:
             - { name: kernel.event_subscriber }
+
+    # Servicios del Chatbot
+    App\Dashboard\AiChatbot\Infrastructure\Service\ChatGPTService:
+        arguments:
+            $client: '@http_client'
+            $apiKey: '%env(CHATGPT_API_KEY)%'
+
+    App\Dashboard\AiChatbot\Domain\Service\ChatServiceInterface:
+        alias: App\Dashboard\AiChatbot\Infrastructure\Service\ChatGPTService
+
+    App\Dashboard\AiChatbot\Application\SendMessage\SendMessageCommandHandler:
+        arguments:
+            $chatService: '@App\Dashboard\AiChatbot\Domain\Service\ChatServiceInterface'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'command_bus' }

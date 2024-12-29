@@ -2,7 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\User;
+use App\Dashboard\User\Domain\Entity\User;
+use App\Dashboard\User\Domain\ValueObjects\UserEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -13,7 +14,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
     name: 'app:create-user',
-    description: 'Creates a new user',
+    description: 'Creates a new admin user',
 )]
 class CreateUserCommand extends Command
 {
@@ -28,19 +29,34 @@ class CreateUserCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $user = new User();
-        $user->setEmail('admin@example.com');
-        $user->setName('Admin User');
-        $user->setRoles(['ROLE_ADMIN']);
+        try {
+            $email = UserEmail::from('admin@admin.com');
 
-        $hashedPassword = $this->passwordHasher->hashPassword($user, 'password123');
-        $user->setPassword($hashedPassword);
+            $tempUser = User::create(
+                'Administrator',
+                $email,
+                ['ROLE_ADMIN'],
+                'temp'
+            );
 
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+            $hashedPassword = $this->passwordHasher->hashPassword($tempUser, 'Alex123');
 
-        $io->success('User created successfully.');
+            $user = User::create(
+                'Administrator',
+                $email,
+                ['ROLE_ADMIN'],
+                $hashedPassword
+            );
 
-        return Command::SUCCESS;
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            $io->success(sprintf('Admin user created successfully with email: %s', $email->value()));
+
+            return Command::SUCCESS;
+        } catch (\Exception $e) {
+            $io->error($e->getMessage());
+            return Command::FAILURE;
+        }
     }
 }

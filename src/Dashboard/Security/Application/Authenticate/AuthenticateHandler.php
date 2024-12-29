@@ -18,7 +18,13 @@ final class AuthenticateHandler
 
     public function __invoke(AuthenticateCommand $command): AuthenticationResponse
     {
-        $user = $this->repository->findByEmail(UserEmail::from($command->email()));
+        try {
+            $userEmail = UserEmail::from($command->email());
+        } catch (\InvalidArgumentException) {
+            throw new AuthenticationException('Invalid credentials');
+        }
+
+        $user = $this->repository->findByEmail($userEmail);
 
         if ($user === null) {
             throw new AuthenticationException('Invalid credentials');
