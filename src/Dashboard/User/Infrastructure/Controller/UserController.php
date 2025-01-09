@@ -3,15 +3,12 @@
 namespace App\Dashboard\User\Infrastructure\Controller;
 
 use App\Dashboard\User\Application\Create\CreateUserCommand;
-use App\Dashboard\User\Application\Create\CreateUserHandler;
-use App\Dashboard\User\Application\GetAll\GetAllUsersHandler;
 use App\Dashboard\User\Application\GetAll\GetAllUsersQuery;
 use App\Dashboard\User\Application\Update\UpdateUserCommand;
-use App\Dashboard\User\Application\Update\UpdateUserHandler;
 use App\Dashboard\User\Application\Delete\DeleteUserCommand;
-use App\Dashboard\User\Application\Delete\DeleteUserHandler;
 use App\Dashboard\User\Application\Get\GetUserQuery;
-use App\Dashboard\User\Application\Get\GetUserHandler;
+use App\Dashboard\Shared\Domain\Bus\Command\CommandBus;
+use App\Dashboard\Shared\Domain\Bus\Query\QueryBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,11 +18,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 final class UserController
 {
     public function __construct(
-        private readonly CreateUserHandler $createUserHandler,
-        private readonly GetAllUsersHandler $getAllUsersHandler,
-        private readonly UpdateUserHandler $updateUserHandler,
-        private readonly DeleteUserHandler $deleteUserHandler,
-        private readonly GetUserHandler $getUserHandler,
+        private readonly CommandBus $commandBus,
+        private readonly QueryBus $queryBus,
         private readonly TokenStorageInterface $tokenStorage
     ) {}
 
@@ -33,7 +27,7 @@ final class UserController
     public function index(): JsonResponse
     {
         try {
-            $users = ($this->getAllUsersHandler)(new GetAllUsersQuery());
+            $users = $this->queryBus->handle(new GetAllUsersQuery());
             return new JsonResponse($users);
         } catch (\Exception $e) {
             return new JsonResponse(['message' => 'An error occurred'], 500);
@@ -53,7 +47,7 @@ final class UserController
                 $data['password'] ?? ''
             );
 
-            ($this->createUserHandler)($command);
+            $this->commandBus->dispatch($command);
 
             return new JsonResponse(['message' => 'User created successfully'], 201);
         } catch (\DomainException $e) {
@@ -77,7 +71,7 @@ final class UserController
                 $data['password'] ?? null
             );
 
-            ($this->updateUserHandler)($command);
+            $this->commandBus->dispatch($command);
 
             return new JsonResponse(['message' => 'User updated successfully']);
         } catch (\DomainException $e) {
@@ -99,7 +93,7 @@ final class UserController
             $currentUser = $token->getUser()->id()->value();
 
             $command = new DeleteUserCommand($id, $currentUser);
-            ($this->deleteUserHandler)($command);
+            $this->commandBus->dispatch($command);
 
             return new JsonResponse(null, 204);
         } catch (\DomainException $e) {
@@ -113,7 +107,7 @@ final class UserController
     public function show(int $id): JsonResponse
     {
         try {
-            $user = ($this->getUserHandler)(new GetUserQuery($id));
+            $user = $this->queryBus->handle(new GetUserQuery($id));
             return new JsonResponse($user);
         } catch (\DomainException $e) {
             return new JsonResponse(['message' => $e->getMessage()], 404);

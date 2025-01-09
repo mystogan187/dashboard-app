@@ -2,7 +2,9 @@
 
 namespace App\Dashboard\Profile\Application\ChangePassword;
 
-final class ChangePasswordCommand
+use App\Dashboard\Shared\Domain\Bus\Command\Command;
+
+final class ChangePasswordCommand implements Command
 {
     public function __construct(
         private readonly int $userId,

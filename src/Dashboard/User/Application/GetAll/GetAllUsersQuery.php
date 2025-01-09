@@ -2,7 +2,9 @@
 
 namespace App\Dashboard\User\Application\GetAll;
 
-class GetAllUsersQuery
+use App\Dashboard\Shared\Domain\Bus\Query\Query;
+
+class GetAllUsersQuery implements Query
 {
 
 }

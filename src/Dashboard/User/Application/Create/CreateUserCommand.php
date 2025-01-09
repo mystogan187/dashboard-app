@@ -2,7 +2,9 @@
 
 namespace App\Dashboard\User\Application\Create;
 
-final class CreateUserCommand
+use App\Dashboard\Shared\Domain\Bus\Command\Command;
+
+final class CreateUserCommand implements Command
 {
     public function __construct(
         private readonly string $name,

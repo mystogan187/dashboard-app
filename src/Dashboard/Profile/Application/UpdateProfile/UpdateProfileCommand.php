@@ -2,7 +2,9 @@
 
 namespace App\Dashboard\Profile\Application\UpdateProfile;
 
-final class UpdateProfileCommand
+use App\Dashboard\Shared\Domain\Bus\Command\Command;
+
+final class UpdateProfileCommand implements Command
 {
     public function __construct(
         private readonly int $userId,

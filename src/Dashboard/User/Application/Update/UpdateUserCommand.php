@@ -2,9 +2,10 @@
 
 namespace App\Dashboard\User\Application\Update;
 
+use App\Dashboard\Shared\Domain\Bus\Command\Command;
 use App\Dashboard\User\Domain\ValueObjects\UserId;
 
-final class UpdateUserCommand
+final class UpdateUserCommand implements Command
 {
     public function __construct(
         private readonly int $id,

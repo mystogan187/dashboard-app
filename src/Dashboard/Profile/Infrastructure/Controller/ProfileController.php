@@ -1,13 +1,10 @@
 <?php
-
 namespace App\Dashboard\Profile\Infrastructure\Controller;
 
 use App\Dashboard\Profile\Application\ChangePassword\ChangePasswordCommand;
-use App\Dashboard\Profile\Application\ChangePassword\ChangePasswordHandler;
 use App\Dashboard\Profile\Application\UpdateProfile\UpdateProfileCommand;
-use App\Dashboard\Profile\Application\UpdateProfile\UpdateProfileHandler;
 use App\Dashboard\Profile\Application\UploadPhoto\UploadPhotoCommand;
-use App\Dashboard\Profile\Application\UploadPhoto\UploadPhotoHandler;
+use App\Dashboard\Shared\Domain\Bus\Command\CommandBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,9 +14,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 final class ProfileController
 {
     public function __construct(
-        private readonly UpdateProfileHandler $updateProfileHandler,
-        private readonly ChangePasswordHandler $changePasswordHandler,
-        private readonly UploadPhotoHandler $uploadPhotoHandler,
+        private readonly CommandBus $commandBus,
         private readonly TokenStorageInterface $tokenStorage
     ) {}
 
@@ -33,7 +28,6 @@ final class ProfileController
         return $token->getUser()->id()->value();
     }
 
-
     #[Route('/update', name: 'api_profile_update', methods: ['PUT'])]
     public function update(Request $request): JsonResponse
     {
@@ -46,7 +40,7 @@ final class ProfileController
                 $data['email'] ?? ''
             );
 
-            $response = ($this->updateProfileHandler)($command);
+            $response = $this->commandBus->dispatch($command);
 
             return new JsonResponse([
                 'message' => 'Profile updated successfully',
@@ -77,18 +71,9 @@ final class ProfileController
                 $data['newPassword'] ?? ''
             );
 
-            $response = ($this->changePasswordHandler)($command);
+            $this->commandBus->dispatch($command);
 
-            return new JsonResponse([
-                'message' => 'Password updated successfully',
-                'user' => [
-                    'id' => $response->id,
-                    'email' => $response->email,
-                    'name' => $response->name,
-                    'roles' => $response->roles,
-                    'profilePhoto' => $response->profilePhoto
-                ]
-            ]);
+            return new JsonResponse(['message' => 'Password updated successfully']);
         } catch (\DomainException $e) {
             return new JsonResponse(['message' => $e->getMessage()], 400);
         } catch (\Exception $e) {
@@ -110,7 +95,7 @@ final class ProfileController
                 $photo
             );
 
-            $response = ($this->uploadPhotoHandler)($command);
+            $response = $this->commandBus->dispatch($command);
 
             return new JsonResponse([
                 'message' => 'Photo uploaded successfully',

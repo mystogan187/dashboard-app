@@ -2,9 +2,10 @@
 
 namespace App\Dashboard\Profile\Application\UploadPhoto;
 
+use App\Dashboard\Shared\Domain\Bus\Command\Command;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-final class UploadPhotoCommand
+final class UploadPhotoCommand implements Command
 {
     public function __construct(
         private readonly int $userId,
